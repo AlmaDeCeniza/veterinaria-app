@@ -11,9 +11,9 @@ def create_app() -> Flask:
 
     with app.app_context():
         from .models import (
-#            Dueno,
-#            Mascota,
-#            Veterinario,
+            Dueno,
+            Mascota,
+            Veterinario,
 #            Consulta,
 #            Tratamiento
         )
