@@ -3,11 +3,13 @@ from flask_appbuilder import BaseView, ModelView, expose
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 
 from .models import (
+    Consulta,
     Dueno,
     Mascota,
+    Tratamiento,
     Veterinario,
-#    Consulta,
-#    Tratamiento
+    Consulta,
+    Tratamiento
 )
 
 
@@ -36,9 +38,22 @@ class VeterinarioModelView(ModelView):
     add_columns = ["nombre", "especialidad", "estado"]
     edit_columns = ["nombre", "especialidad", "estado"]
     show_columns = ["nombre", "especialidad", "estado", "creado_en"]
-#1
+class ConsultaModelView(ModelView):
+    datamodel = SQLAInterface(Consulta)
 
-#2
+    list_columns = ["mascota", "veterinario", "motivo", "fecha"]
+    add_columns = ["mascota", "veterinario", "motivo"]
+    edit_columns = ["mascota", "veterinario", "motivo"]
+    show_columns = ["mascota", "veterinario", "motivo", "fecha"]
+
+
+class TratamientoModelView(ModelView):
+    datamodel = SQLAInterface(Tratamiento)
+
+    list_columns = ["descripcion", "consulta"]
+    add_columns = ["descripcion", "consulta"]
+    edit_columns = ["descripcion", "consulta"]
+    show_columns = ["descripcion", "consulta"]
 
 
 
@@ -62,7 +77,16 @@ appbuilder.add_view(
     icon="fa-user-md",
     category="Veterinaria"
 )
-#1
+appbuilder.add_view(
+    ConsultaModelView,
+    "Consultas",
+    icon="fa-stethoscope",
+    category="Consultas"
+)
 
-
-#2
+appbuilder.add_view(
+    TratamientoModelView,
+    "Tratamientos",
+    icon="fa-medkit",
+    category="Consultas"
+)
