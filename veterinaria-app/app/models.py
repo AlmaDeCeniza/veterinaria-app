@@ -1,5 +1,6 @@
 import datetime
 from flask_appbuilder import Model
+from markupsafe import Markup
 from sqlalchemy import Boolean, Column, DateTime, Integer, String, ForeignKey, Text
 from sqlalchemy.orm import relationship
 
@@ -32,13 +33,22 @@ class Mascota(Model):
     dueno_id = Column(Integer, ForeignKey("dueno.id"), nullable=False)
 
     estado = Column(Boolean, nullable=True)
+    foto = Column(String(255), nullable=True)
     creado_en = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
     actualizado_en = Column(DateTime, default=datetime.datetime.utcnow,
                              onupdate=datetime.datetime.utcnow, nullable=False)
 
     dueno = relationship("Dueno", back_populates="mascotas")
     consultas = relationship("Consulta", back_populates="mascota")
+    def foto_preview(self):
+    
+        if self.foto:
 
+            return Markup(
+            f'<img src="/static/{self.foto}" width="100">'
+            )
+
+        return "Sin imagen"
     def __repr__(self):
         return self.nombre
 
