@@ -1,13 +1,20 @@
+import os
+
+from werkzeug.utils import secure_filename
+from wtforms import FileField
+from flask import current_app, request
 from .extensions import appbuilder, db
 from flask_appbuilder import BaseView, ModelView, expose
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 
 from .models import (
+    Consulta,
     Dueno,
     Mascota,
+    Tratamiento,
     Veterinario,
-#    Consulta,
-#    Tratamiento
+    Consulta,
+    Tratamiento
 )
 
 
@@ -22,13 +29,59 @@ class DuenoModelView(ModelView):
 
 class MascotaModelView(ModelView):
     datamodel = SQLAInterface(Mascota)
-
-    list_columns = ["nombre", "tipo", "edad", "dueno", "estado"]
-    add_columns = ["nombre", "tipo", "edad", "dueno", "estado"]
-    edit_columns = ["nombre", "tipo", "edad", "dueno", "estado"]
+    add_form_extra_fields = {
+    "imagen_file": FileField("Foto")
+    }
+    edit_form_extra_fields = {
+        "imagen_file": FileField("Foto")
+    }
+    label_columns = {"foto_preview": "Foto", "dueno": "Dueño"}   
+    list_columns = ["nombre", "tipo", "edad", "dueno", "estado", "foto_preview"]
+    add_columns = ["nombre", "tipo", "edad", "dueno", "estado", "imagen_file"]
+    edit_columns = ["nombre", "tipo", "edad", "dueno", "estado","imagen_file"]
     show_columns = ["nombre", "tipo", "edad", "dueno", "estado", "creado_en"]
+    def pre_add(self, item):
 
+        file = request.files.get("imagen_file")
 
+        if file:
+
+            filename = secure_filename(file.filename)
+
+            upload_path = os.path.join(
+                current_app.root_path,
+                "static",
+                "uploads"
+            )
+
+            os.makedirs(upload_path, exist_ok=True)
+
+            file_path = os.path.join(upload_path, filename)
+
+            file.save(file_path)
+
+            item.foto = f"uploads/{filename}"
+    def pre_update(self, item):
+        
+        file = request.files.get("imagen_file")
+
+        if file and file.filename:
+
+            filename = secure_filename(file.filename)
+
+            upload_path = os.path.join(
+                current_app.root_path,
+                "static",
+                "uploads"
+            )
+
+            os.makedirs(upload_path, exist_ok=True)
+
+            file_path = os.path.join(upload_path, filename)
+
+            file.save(file_path)
+
+            item.foto = f"uploads/{filename}"
 class VeterinarioModelView(ModelView):
     datamodel = SQLAInterface(Veterinario)
 
@@ -36,9 +89,22 @@ class VeterinarioModelView(ModelView):
     add_columns = ["nombre", "especialidad", "estado"]
     edit_columns = ["nombre", "especialidad", "estado"]
     show_columns = ["nombre", "especialidad", "estado", "creado_en"]
-#1
+class ConsultaModelView(ModelView):
+    datamodel = SQLAInterface(Consulta)
 
-#2
+    list_columns = ["mascota", "veterinario", "motivo", "fecha"]
+    add_columns = ["mascota", "veterinario", "motivo"]
+    edit_columns = ["mascota", "veterinario", "motivo"]
+    show_columns = ["mascota", "veterinario", "motivo", "fecha"]
+
+
+class TratamientoModelView(ModelView):
+    datamodel = SQLAInterface(Tratamiento)
+
+    list_columns = ["descripcion", "consulta"]
+    add_columns = ["descripcion", "consulta"]
+    edit_columns = ["descripcion", "consulta"]
+    show_columns = ["descripcion", "consulta"]
 
 
 
@@ -62,7 +128,16 @@ appbuilder.add_view(
     icon="fa-user-md",
     category="Veterinaria"
 )
-#1
+appbuilder.add_view(
+    ConsultaModelView,
+    "Consultas",
+    icon="fa-stethoscope",
+    category="Consultas"
+)
 
-
-#2
+appbuilder.add_view(
+    TratamientoModelView,
+    "Tratamientos",
+    icon="fa-medkit",
+    category="Consultas"
+)

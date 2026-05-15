@@ -14,8 +14,8 @@ def create_app() -> Flask:
             Dueno,
             Mascota,
             Veterinario,
-#            Consulta,
-#            Tratamiento
+            Consulta,
+            Tratamiento
         )
 
         db.create_all()
