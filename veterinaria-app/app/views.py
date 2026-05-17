@@ -1,5 +1,5 @@
 import os
-
+      
 from werkzeug.utils import secure_filename
 from wtforms import FileField
 from flask import current_app, request
@@ -105,7 +105,25 @@ class TratamientoModelView(ModelView):
     add_columns = ["descripcion", "consulta"]
     edit_columns = ["descripcion", "consulta"]
     show_columns = ["descripcion", "consulta"]
+    
+class ReporteView(BaseView):
+    route_base = '/reportes'
 
+    @expose('/')
+    def index(self):
+
+        total_consultas = db.session.query(Consulta).count()
+
+        consultas_por_veterinario = db.session.query(
+            Veterinario.nombre,
+            db.func.count(Consulta.id)
+        ).join(Consulta).group_by(Veterinario.nombre).all()
+
+        return self.render_template(
+            'reportes.html',
+            total_consultas=total_consultas,
+            consultas_por_veterinario=consultas_por_veterinario
+        )
 
 
 appbuilder.add_view(
@@ -140,4 +158,12 @@ appbuilder.add_view(
     "Tratamientos",
     icon="fa-medkit",
     category="Consultas"
+)
+appbuilder.add_view_no_menu(ReporteView())
+
+appbuilder.add_link(
+    "Reporte",
+    href="/reportes/",
+    icon="fa-bar-chart",
+    category="Reportes"
 )
