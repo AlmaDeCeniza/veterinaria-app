@@ -22,15 +22,27 @@ class Dueno(Model):
         return self.nombre
 
 
+class TipoMascota(Model):
+    __tablename__ = "tipo_mascota"
+
+    id = Column(Integer, primary_key=True)
+    nombre = Column(String(50), nullable=False, unique=True)
+
+    mascotas = relationship("Mascota", back_populates="tipo")
+
+    def __repr__(self):
+        return self.nombre
+
+
 class Mascota(Model):
     __tablename__ = "mascota"
 
     id = Column(Integer, primary_key=True)
     nombre = Column(String(100), nullable=False)
-    tipo = Column(String(50), nullable=False)
     edad = Column(Integer, nullable=True)
 
     dueno_id = Column(Integer, ForeignKey("dueno.id"), nullable=False)
+    tipo_id = Column(Integer, ForeignKey("tipo_mascota.id"), nullable=False)
 
     estado = Column(Boolean, nullable=True)
     foto = Column(String(255), nullable=True)
@@ -39,6 +51,7 @@ class Mascota(Model):
                              onupdate=datetime.datetime.utcnow, nullable=False)
 
     dueno = relationship("Dueno", back_populates="mascotas")
+    tipo = relationship("TipoMascota", back_populates="mascotas")
     consultas = relationship("Consulta", back_populates="mascota")
     def foto_preview(self):
     

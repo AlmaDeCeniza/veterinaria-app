@@ -1,0 +1,182 @@
+{% extends "appbuilder/base.html" %}
+
+{% block content %}
+<style>
+    .dashboard-wrapper {
+        background: transparent;
+        padding: 10px;
+    }
+
+    .title-section {
+        text-align: center;
+        margin-bottom: 30px;
+        padding: 20px 0;
+    }
+
+    .title-section h1 {
+        font-size: 32px;
+        color: #1e3a8a;
+        font-weight: bold;
+    }
+
+    .title-section p {
+        color: #666;
+        font-size: 16px;
+    }
+
+    .chart-container {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border: 1px solid #e5e7eb;
+        margin: 0 auto;
+        max-width: 1000px;
+    }
+
+    .chart-title {
+        color: #1e40af;
+        font-size: 20px;
+        margin-bottom: 15px;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .table-container {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border: 1px solid #e5e7eb;
+        margin-top: 20px;
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .custom-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .custom-table th {
+        background-color: #f8fafc;
+        color: #64748b;
+        font-weight: 600;
+        text-align: left;
+        padding: 12px 15px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .custom-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #f1f5f9;
+        color: #334155;
+    }
+
+    .badge-count {
+        background: #2563eb;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+</style>
+
+<div class="dashboard-wrapper">
+    <div class="title-section">
+        <h1>🔄 Recurrencia de Pacientes</h1>
+        <p>Identificación de mascotas con visitas frecuentes para seguimiento preventivo</p>
+    </div>
+
+    <div class="chart-container">
+        <div class="chart-title">📊 Top de Pacientes Recurrentes</div>
+        <div style="height: 400px; position: relative;">
+            <canvas id="graficaRecurrencia"></canvas>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <div class="chart-title">📋 Detalle de Frecuencia</div>
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>Mascota</th>
+                    <th>Especie</th>
+                    <th>Número de Visitas</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in resultados %}
+                <tr>
+                    <td>{{ item[0] }}</td>
+                    <td>{{ item[1] }}</td>
+                    <td><span class="badge-count">{{ item[2] }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    window.onload = function() {
+        const canvas = document.getElementById('graficaRecurrencia');
+        const ctx = canvas.getContext('2d');
+        const labels = {{ resultados | map(attribute=0) | list | tojson }};
+        const data = {{ resultados | map(attribute=1) | list | tojson }}; // Note: This is actually the count in results[2]
+
+        // I should correct the data map to use index 2
+        const realData = {{ resultados | map(attribute=2) | list | tojson }};
+
+        const palette = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#6366f1', '#a855f7'];
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Cantidad de Visitas',
+                    data: realData,
+                    backgroundColor: data.map((_, i) => palette[i % palette.length]),
+                    borderRadius: 8,
+                    borderWidth: 0,
+                    barPercentage: 0.6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1e293b',
+                        titleColor: '#f8fafc',
+                        bodyColor: '#f8fafc',
+                        cornerRadius: 10,
+                        callbacks: {
+                            label: function(context) {
+                                return ' 🐾 ' + context.parsed.y + ' visitas';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1, color: '#64748b', font: { size: 12 } },
+                        grid: { color: '#f1f5f9', drawBorder: false }
+                    },
+                    x: {
+                        ticks: { color: '#64748b', font: { size: 12 } },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends "appbuilder/base.html" %}
+
+{% block content %}
+<style>
+    .dashboard-wrapper {
+        background: transparent;
+        padding: 10px;
+    }
+
+    .title-section {
+        text-align: center;
+        margin-bottom: 30px;
+        padding: 20px 0;
+    }
+
+    .title-section h1 {
+        font-size: 32px;
+        color: #1e3a8a;
+        font-weight: bold;
+    }
+
+    .title-section p {
+        color: #666;
+        font-size: 16px;
+    }
+
+    .chart-container {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border: 1px solid #e5e7eb;
+        margin: 0 auto;
+        max-width: 1000px;
+    }
+
+    .chart-title {
+        color: #1e40af;
+        font-size: 20px;
+        margin-bottom: 15px;
+        font-weight: bold;
+        text-align: center;
+    }
+</style>
+
+<div class="dashboard-wrapper">
+    <div class="title-section">
+        <h1>📈 Tendencia Temporal de Consultas</h1>
+        <p>Evolución de la actividad de la clínica a lo largo del tiempo</p>
+    </div >
+
+    <!-- Filtros de Fecha -->
+    <div class="chart-container" style="margin-bottom: 20px; padding: 15px; display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap;">
+        <form method="GET" action="/reporte-temporal/" style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap; justify-content: center;">
+            <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                <label style="font-size: 12px; color: #666; margin-bottom: 4px; font-weight: bold;">Desde:</label>
+                <input type="date" name="start_date" value="{{ start_date }}" style="padding: 8px; border: 1px solid #e5e7eb; border-radius: 8px; outline: none;">
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                <label style="font-size: 12px; color: #666; margin-bottom: 4px; font-weight: bold;">Hasta:</label>
+                <input type="date" name="end_date" value="{{ end_date }}" style="padding: 8px; border: 1px solid #e5e7eb; border-radius: 8px; outline: none;">
+            </div>
+            <button type="submit" style="background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 20px; transition: 0.3s;">
+                Filtrar
+            </button>
+            <a href="/reporte-temporal/" style="text-decoration: none; color: #666; font-size: 14px; margin-top: 25px; cursor: pointer;">Limpiar</a>
+        </form>
+    </div>
+
+    <div class="chart-container">
+        <div class="chart-title">📊 Consultas Mensuales</div>
+        <div style="height: 500px; position: relative;">
+            <canvas id="graficaTemporal"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    window.onload = function() {
+        const canvas = document.getElementById('graficaTemporal');
+        const ctx = canvas.getContext('2d');
+        const labels = {{ labels | tojson }};
+        const data = {{ data | tojson }};
+
+        const palette = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#6366f1', '#a855f7'];
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Consultas Mensuales',
+                    data: data,
+                    backgroundColor: data.map((_, i) => palette[i % palette.length]),
+                    borderRadius: 8,
+                    borderWidth: 0,
+                    barPercentage: 0.7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1e293b',
+                        titleColor: '#f8fafc',
+                        bodyColor: '#f8fafc',
+                        cornerRadius: 10,
+                        displayXAxis: false,
+                        callbacks: {
+                            label: function(context) {
+                                return ' 📦 ' + context.parsed.y + ' consultas';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1, color: '#64748b', font: { size: 12 } },
+                        grid: { color: '#f1f5f9', drawBorder: false }
+                    },
+                    x: {
+                        ticks: { color: '#64748b', font: { size: 12 } },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

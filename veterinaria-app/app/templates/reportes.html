@@ -192,6 +192,37 @@
                 }
             }
         });
+
+        // Gráfica de Distribución de Especies
+        const ctxEspecies = document.getElementById('graficaEspecies');
+        const labelsEspecies = {{ distribucion_especies | map(attribute=0) | list | tojson }};
+        const dataEspecies = {{ distribucion_especies | map(attribute=1) | list | tojson }};
+
+        new Chart(ctxEspecies, {
+            type: 'pie',
+            data: {
+                labels: labelsEspecies,
+                datasets: [{
+                    data: dataEspecies,
+                    backgroundColor: palette,
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#374151',
+                            font: { size: 12 }
+                        }
+                    }
+                }
+            }
+        });
     }
 </script>
 {% endblock %}
