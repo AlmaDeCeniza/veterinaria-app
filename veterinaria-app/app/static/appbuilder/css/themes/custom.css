@@ -1,0 +1,21 @@
+@import url("https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/flatly/flatly.min.css");
+
+/* Navbar Overrides */
+.navbar-appbuilder {
+    background-color: #003366 !important;
+    border-bottom: none !important;
+}
+
+.navbar-appbuilder .navbar-brand,
+.navbar-appbuilder .navbar-nav > li > a {
+    color: white !important;
+}
+
+/* Maintain other primary colors from custom.css if needed */
+.btn-primary {
+    background-color: #003366 !important;
+    border-color: #003366 !important;
+}
+.btn-primary:hover {
+    background-color: #002244 !important;
+}

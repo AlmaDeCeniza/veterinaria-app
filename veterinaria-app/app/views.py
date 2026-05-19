@@ -39,7 +39,7 @@ class MascotaModelView(ModelView):
     list_columns = ["nombre", "tipo", "edad", "dueno", "estado", "foto_preview"]
     add_columns = ["nombre", "tipo", "edad", "dueno", "estado", "imagen_file"]
     edit_columns = ["nombre", "tipo", "edad", "dueno", "estado","imagen_file"]
-    show_columns = ["nombre", "tipo", "edad", "dueno", "estado", "creado_en"]
+    show_columns = ["nombre", "tipo", "edad", "dueno", "estado", "foto_preview","creado_en"]
     def pre_add(self, item):
 
         file = request.files.get("imagen_file")
@@ -130,21 +130,21 @@ appbuilder.add_view(
     DuenoModelView,
     "Dueños",
     icon="fa-user",
-    category="Veterinaria"
+    category="Administración"
 )
 
 appbuilder.add_view(
     MascotaModelView,
     "Mascotas",
     icon="fa-paw",
-    category="Veterinaria"
+    category="Administración"
 )
 
 appbuilder.add_view(
     VeterinarioModelView,
     "Veterinarios",
     icon="fa-user-md",
-    category="Veterinaria"
+    category="Administración"
 )
 appbuilder.add_view(
     ConsultaModelView,
@@ -162,7 +162,7 @@ appbuilder.add_view(
 appbuilder.add_view_no_menu(ReporteView())
 
 appbuilder.add_link(
-    "Reporte",
+    "Reporte de Consultas por Veterinario",
     href="/reportes/",
     icon="fa-bar-chart",
     category="Reportes"
