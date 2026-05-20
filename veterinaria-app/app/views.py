@@ -6,6 +6,17 @@ from flask import current_app, request
 from .extensions import appbuilder, db
 from flask_appbuilder import BaseView, ModelView, expose
 from flask_appbuilder.models.sqla.interface import SQLAInterface
+from .models import (
+    Consulta,
+    Dueno,
+    Mascota,
+    Tratamiento,
+    Veterinario,
+    TipoMascota,
+    Consulta,
+    Tratamiento
+)
+from .ia_servicio import analizar_recurrencia
 
 from .models import (
     Consulta,
@@ -218,9 +229,13 @@ class RecurrenciaPacientesReporteView(BaseView):
             db.func.count(Consulta.id)
         ).join(Consulta).join(TipoMascota).group_by(Mascota.id, TipoMascota.nombre).order_by(db.func.count(Consulta.id).desc()).all()
 
+        # Obtener análisis de la IA
+        analisis_ia = analizar_recurrencia(resultados)
+
         return self.render_template(
             'reportes_recurrencia.html',
-            resultados=resultados
+            resultados=resultados,
+            analisis_ia=analisis_ia
         )
 
 class EspeciesConsultasReporteView(BaseView):
@@ -298,9 +313,9 @@ appbuilder.add_link(
 )
 
 appbuilder.add_link(
-    "Análisis de Pacientes",
-    href="/reporte-pacientes/",
-    icon="fa-paw",
+    "Recurrencia de Pacientes",
+    href="/reporte-recurrencia/",
+    icon="fa-redo",
     category="Reportes"
 )
 
@@ -319,8 +334,8 @@ appbuilder.add_link(
 )
 
 appbuilder.add_link(
-    "Recurrencia de Pacientes",
-    href="/reporte-recurrencia/",
-    icon="fa-redo",
+    "Análisis de Pacientes",
+    href="/reporte-pacientes/",
+    icon="fa-paw",
     category="Reportes"
 )
