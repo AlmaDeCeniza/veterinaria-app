@@ -222,21 +222,34 @@ class RecurrenciaPacientesReporteView(BaseView):
 
     @expose('/')
     def index(self):
-        # Obtener mascotas con el conteo de sus consultas, ordenadas por las más frecuentes
-        resultados = db.session.query(
-            Mascota.nombre,
-            TipoMascota.nombre,
-            db.func.count(Consulta.id)
-        ).join(Consulta).join(TipoMascota).group_by(Mascota.id, TipoMascota.nombre).order_by(db.func.count(Consulta.id).desc()).all()
+        try:
+            # Obtener mascotas con el conteo de sus consultas, ordenadas por las más frecuentes
+            resultados = db.session.query(
+                Mascota.nombre,
+                TipoMascota.nombre,
+                db.func.count(Consulta.id)
+            ).join(Consulta).join(TipoMascota).group_by(Mascota.id, TipoMascota.nombre).order_by(db.func.count(Consulta.id).desc()).all()
 
-        # Obtener análisis de la IA
-        analisis_ia = analizar_recurrencia(resultados)
+            # Obtener análisis de la IA
+            analisis_ia = analizar_recurrencia(resultados)
 
-        return self.render_template(
-            'reportes_recurrencia.html',
-            resultados=resultados,
-            analisis_ia=analisis_ia
-        )
+            # Cálculos para las tarjetas de resumen
+            total_pacientes = len(resultados)
+            total_visitas = sum(item[2] for item in resultados)
+            promedio_visitas = round(total_visitas / total_pacientes, 1) if total_pacientes > 0 else 0
+            max_recurrencia = resultados[0][2] if resultados else 0
+
+            return self.render_template(
+                'reportes_recurrencia.html',
+                resultados=resultados,
+                analisis_ia=analisis_ia,
+                total_pacientes=total_pacientes,
+                promedio_visitas=promedio_visitas,
+                max_recurrencia=max_recurrencia,
+                currentDate='2026-05-21'
+            )
+        except Exception as e:
+            return f"Error interno en el reporte de recurrencia: {str(e)}", 500
 
 class EspeciesConsultasReporteView(BaseView):
     route_base = '/reporte-especies-consultas'

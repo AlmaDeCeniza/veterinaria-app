@@ -2,7 +2,7 @@ import requests
 import json
 # creen y añadan su KEY
 
-API_KEY = '' #add key
+#API_KEY = '' #add KEY
 
 def analizar_recurrencia(data):
     """
