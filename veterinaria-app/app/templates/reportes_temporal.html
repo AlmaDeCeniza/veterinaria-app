@@ -1,89 +1,82 @@
-{% extends "appbuilder/base.html" %}
+{% extends "base_moderno.html" %}
+
+{% block title %}Tendencia de Consultas | VetCare Pro{% endblock %}
+
+{% block page_title %}Tendencia de Consultas{% endblock %}
 
 {% block content %}
-<style>
-    .dashboard-wrapper {
-        background: transparent;
-        padding: 10px;
-    }
+<div class="max-w-7xl mx-auto space-y-8">
 
-    .title-section {
-        text-align: center;
-        margin-bottom: 30px;
-        padding: 20px 0;
-    }
-
-    .title-section h1 {
-        font-size: 32px;
-        color: #1e3a8a;
-        font-weight: bold;
-    }
-
-    .title-section p {
-        color: #666;
-        font-size: 16px;
-    }
-
-    .chart-container {
-        background: white;
-        border-radius: 15px;
-        padding: 20px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        border: 1px solid #e5e7eb;
-        margin: 0 auto;
-        max-width: 1000px;
-    }
-
-    .chart-title {
-        color: #1e40af;
-        font-size: 20px;
-        margin-bottom: 15px;
-        font-weight: bold;
-        text-align: center;
-    }
-</style>
-
-<div class="dashboard-wrapper">
-    <div class="title-section">
-        <h1>📈 Tendencia Temporal de Consultas</h1>
-        <p>Evolución de la actividad de la clínica a lo largo del tiempo</p>
-    </div >
-
-    <!-- Filtros de Fecha -->
-    <div class="chart-container" style="margin-bottom: 20px; padding: 15px; display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap;">
-        <form method="GET" action="/reporte-temporal/" style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap; justify-content: center;">
-            <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                <label style="font-size: 12px; color: #666; margin-bottom: 4px; font-weight: bold;">Desde:</label>
-                <input type="date" name="start_date" value="{{ start_date }}" style="padding: 8px; border: 1px solid #e5e7eb; border-radius: 8px; outline: none;">
+    <!-- Filters Section -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <div class="flex items-center gap-3 mb-6">
+            <span class="text-xl">📅</span>
+            <h3 class="text-lg font-bold text-slate-800">Filtros de Fecha</h3>
+        </div>
+        <form method="GET" action="/reporte-temporal/" class="flex flex-wrap items-end gap-6">
+            <div class="space-y-2">
+                <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Desde</label>
+                <input type="date" name="start_date" value="{{ start_date }}"
+                       class="block w-full px-4 py-2 text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
             </div>
-            <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                <label style="font-size: 12px; color: #666; margin-bottom: 4px; font-weight: bold;">Hasta:</label>
-                <input type="date" name="end_date" value="{{ end_date }}" style="padding: 8px; border: 1px solid #e5e7eb; border-radius: 8px; outline: none;">
+            <div class="space-y-2">
+                <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Hasta</label>
+                <input type="date" name="end_date" value="{{ end_date }}"
+                       class="block w-full px-4 py-2 text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
             </div>
-            <button type="submit" style="background: #2563eb; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 20px; transition: 0.3s;">
-                Filtrar
-            </button>
-            <a href="/reporte-temporal/" style="text-decoration: none; color: #666; font-size: 14px; margin-top: 25px; cursor: pointer;">Limpiar</a>
+            <div class="flex items-center gap-3">
+                <button type="submit" class="px-6 py-2 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-700 transition-colors shadow-sm shadow-indigo-200">
+                    Filtrar
+                </button>
+                <a href="/reporte-temporal/" class="px-6 py-2 text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors">
+                    Limpiar
+                </a>
+            </div>
         </form>
     </div>
 
-    <div class="chart-container">
-        <div class="chart-title">📊 Consultas Mensuales</div>
-        <div style="height: 500px; position: relative;">
+    <!-- Chart Section -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+                <h3 class="text-lg font-bold text-slate-800">📊 Consultas Mensuales</h3>
+            </div>
+            <span class="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-semibold rounded-full">Análisis Temporal</span>
+        </div>
+        <div class="relative h-[500px] w-full">
             <canvas id="graficaTemporal"></canvas>
         </div>
     </div>
-</div>
 
+    {% if analisis_ia %}
+    <!-- AI Insights Section -->
+    <div class="bg-gradient-to-br from-indigo-50 to-white p-8 rounded-3xl shadow-sm border border-indigo-100 relative overflow-hidden">
+        <div class="absolute top-0 right-0 p-8 opacity-10 text-8xl">✨</div>
+        <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="text-3xl">🧠</span>
+                <h3 class="text-xl font-bold text-indigo-900">Análisis Inteligente de la IA</h3>
+            </div>
+            <div class="prose prose-slate max-w-none text-slate-600 leading-relaxed">
+                {{ analisis_ia | safe }}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     window.onload = function() {
         const canvas = document.getElementById('graficaTemporal');
+        if (!canvas) return;
         const ctx = canvas.getContext('2d');
         const labels = {{ labels | tojson }};
         const data = {{ data | tojson }};
 
-        const palette = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#6366f1', '#a855f7'];
+        const palette = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#6366f1', '#a855f7'];
 
         new Chart(ctx, {
             type: 'bar',

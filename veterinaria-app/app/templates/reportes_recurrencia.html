@@ -1,233 +1,147 @@
-{% extends "appbuilder/base.html" %}
+{% extends "base_moderno.html" %}
 
-{% block content %}
+{% block title %}Recurrencia de Pacientes | VetCare Pro{% endblock %}
+
+{% block page_title %}Recurrencia de Pacientes{% endblock %}
+
+{% block extra_css %}
 <style>
-    .dashboard-wrapper {
-        background: transparent;
-        padding: 10px;
-    }
-
-    .title-section {
-        text-align: center;
-        margin-bottom: 30px;
-        padding: 20px 0;
-    }
-
-    .title-section h1 {
-        font-size: 32px;
-        color: #1e3a8a;
-        font-weight: bold;
-    }
-
-    .title-section p {
-        color: #666;
-        font-size: 16px;
-    }
-
     .chart-container {
-        background: white;
-        border-radius: 15px;
-        padding: 20px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        border: 1px solid #e5e7eb;
-    }
-
-    .chart-title {
-        color: #1e40af;
-        font-size: 20px;
-        margin-bottom: 15px;
-        font-weight: bold;
-        text-align: center;
-    }
-
-    .table-container {
-        background: white;
-        border-radius: 15px;
-        padding: 20px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        border: 1px solid #e5e7eb;
-    }
-
-    .custom-table {
+        position: relative;
+        height: 400px;
         width: 100%;
-        border-collapse: collapse;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-
-    .custom-table th {
-        background-color: #f8fafc;
-        color: #64748b;
-        font-weight: 600;
-        text-align: left;
-        padding: 12px 15px;
-        border-bottom: 2px solid #e2e8f0;
-    }
-
-    .custom-table td {
-        padding: 12px 15px;
-        border-bottom: 1px solid #f1f5f9;
-        color: #334155;
-    }
-
-    .ai-container {
-        background: linear-gradient(135deg, #f0f9ff 0%, #fdf2f8 100%);
-        border-radius: 20px;
-        padding: 30px;
-        box-shadow: 0 10px 25px rgba(30, 64, 175, 0.05);
-        border: 1px solid #dbeafe;
-        margin: 20px auto;
-        max-width: 1000px;
-        position: relative;
-    }
-
-    .ai-title {
-        color: #1e40af;
-        font-size: 22px;
-        margin-bottom: 20px;
-        font-weight: bold;
-        text-align: center;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-    }
-
-    .ai-content {
-        color: #334155;
-        line-height: 1.7;
-        font-size: 15px;
-    }
-
-    /* Estilizando los 3 puntos del informe de la IA */
-    .ai-content strong {
-        display: block;
-        font-size: 17px;
-        color: #1e40af;
-        margin-top: 20px;
-        margin-bottom: 10px;
-        padding-bottom: 5px;
-        border-bottom: 2px solid #bfdbfe;
-        font-weight: 700;
-    }
-
-    .ai-content strong:first-child {
-        margin-top: 0;
-    }
-
-    .ai-content p {
-        margin-bottom: 12px;
-        color: #475569;
-    }
-
-    .ai-content ul {
-        list-style: none;
-        padding: 0;
-        margin-bottom: 20px;
-    }
-
-    .ai-content li {
-        position: relative;
-        padding-left: 25px;
-        margin-bottom: 8px;
-        color: #475569;
-    }
-
-    .ai-content li::before {
-        content: "✦";
-        position: absolute;
-        left: 0;
-        color: #3b82f6;
-        font-weight: bold;
-    }
-
-    .badge-count {
-        background: #2563eb;
-        color: white;
-        padding: 4px 12px;
-        border-radius: 12px;
-        font-size: 12px;
-        font-weight: bold;
-    }
-
-    .main-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-        gap: 25px;
-        margin: 0 auto 30px auto;
-        max-width: 1200px;
-        align-items: start;
     }
 </style>
+{% endblock %}
 
-<div class="dashboard-wrapper">
-    <div class="title-section">
-        <h1>🔄 Recurrencia de Pacientes</h1>
-        <p>Identificación de mascotas con visitas frecuentes para seguimiento preventivo</p>
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-8">
+
+    <!-- Header & Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
+            <div class="p-3 bg-indigo-100 rounded-xl text-indigo-600 text-2xl">🔄</div>
+            <div>
+                <p class="text-sm font-medium text-slate-500">Pacientes Recurrentes</p>
+                <h3 class="text-2xl font-bold text-slate-800">{{ total_pacientes }}</h3>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
+            <div class="p-3 bg-emerald-100 rounded-xl text-emerald-600 text-2xl">🐾</div>
+            <div>
+                <p class="text-sm font-medium text-slate-500">Promedio Visitas</p>
+                <h3 class="text-2xl font-bold text-slate-800">{{ promedio_visitas }}</h3>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
+            <div class="p-3 bg-amber-100 rounded-xl text-amber-600 text-2xl">⭐</div>
+            <div>
+                <p class="text-sm font-medium text-slate-500">Máxima Recurrencia</p>
+                <h3 class="text-2xl font-bold text-slate-800">{{ max_recurrencia }} visitas</h3>
+            </div>
+        </div>
     </div>
 
-    <div class="main-grid">
-        <div class="chart-container">
-            <div class="chart-title">📊 Top de Pacientes Recurrentes</div>
-            <div style="height: 400px; position: relative;">
+    {% if resultados %}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Chart Section -->
+        <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-bold text-slate-800">📊 Análisis de Frecuencia</h3>
+                <span class="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-semibold rounded-full">Visualización de Datos</span>
+            </div>
+            <div class="chart-container">
                 <canvas id="graficaRecurrencia"></canvas>
             </div>
         </div>
 
-        <div class="table-container">
-            <div class="chart-title">📋 Detalle de Frecuencia</div>
-            <table class="custom-table">
-                <thead>
-                    <tr>
-                        <th>Mascota</th>
-                        <th>Especie</th>
-                        <th>Número de Visitas</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in resultados %}
-                    <tr>
-                        <td>{{ item[0] }}</td>
-                        <td>{{ item[1] }}</td>
-                        <td><span class="badge-count">{{ item[2] }}</span></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <!-- Table Section -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <h3 class="text-lg font-bold text-slate-800 mb-6">📋 Detalle de Pacientes</h3>
+            <div class="overflow-y-auto max-h-[400px] pr-2">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="text-slate-400 text-xs uppercase tracking-wider border-b border-slate-100">
+                            <th class="pb-3 font-semibold">Mascota</th>
+                            <th class="pb-3 font-semibold text-right">Visitas</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for item in resultados %}
+                        <tr class="hover:bg-slate-50 transition-colors group cursor-default">
+                            <td class="py-3">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-lg">🐾</span>
+                                    <div>
+                                        <p class="font-medium text-slate-700 group-hover:text-indigo-600 transition-colors">{{ item[0] }}</p>
+                                        <p class="text-xs text-slate-400">{{ item[1] }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-3 text-right">
+                                <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700 border border-indigo-200">
+                                    {{ item[2] }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <div class="ai-container">
-        <div class="ai-title">✨ Análisis Inteligente de la IA</div>
-        <div class="ai-content">
-            {{ analisis_ia | safe }}
+    <!-- AI Insights Section -->
+    <div class="bg-gradient-to-br from-indigo-50 to-white p-8 rounded-3xl shadow-sm border border-indigo-100 relative overflow-hidden">
+        <div class="absolute top-0 right-0 p-8 opacity-10 text-8xl">✨</div>
+        <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="text-3xl">🧠</span>
+                <h3 class="text-xl font-bold text-indigo-900">Análisis Inteligente de la IA</h3>
+            </div>
+            <div class="prose prose-slate max-w-none text-slate-600 leading-relaxed">
+                {{ analisis_ia | safe }}
+            </div>
         </div>
     </div>
+
+    {% else %}
+    <div class="flex flex-col items-center justify-center py-20 text-center">
+        <div class="text-6xl mb-4">📭</div>
+        <h3 class="text-xl font-bold text-slate-800">Sin datos disponibles</h3>
+        <p class="text-slate-500">No se encontraron registros de recurrencia en este momento.</p>
+    </div>
+    {% endif %}
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     window.onload = function() {
         const canvas = document.getElementById('graficaRecurrencia');
+        if (!canvas) return;
         const ctx = canvas.getContext('2d');
-        const labels = {{ resultados | map(attribute=0) | list | tojson }};
-        const data = {{ resultados | map(attribute=1) | list | tojson }}; // Note: This is actually the count in results[2]
 
-        // I should correct the data map to use index 2
-        const realData = {{ resultados | map(attribute=2) | list | tojson }};
+        const labels = {{ resultados | map(attribute=0) | list | tojson if resultados else '[]' }};
+        const realData = {{ resultados | map(attribute=2) | list | tojson if resultados else '[]' }};
 
-        const palette = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#6366f1', '#a855f7'];
+        const palette = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#6366f1', '#a855f7'];
 
         new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Cantidad de Visitas',
+                    label: 'Visitas',
                     data: realData,
-                    backgroundColor: data.map((_, i) => palette[i % palette.length]),
+                    backgroundColor: realData.map((_, i) => palette[i % palette.length]),
                     borderRadius: 8,
                     borderWidth: 0,
-                    barPercentage: 0.6
+                    barPercentage: 0.7
                 }]
             },
             options: {
@@ -254,7 +168,7 @@
                         grid: { color: '#f1f5f9', drawBorder: false }
                     },
                     x: {
-                        ticks: { color: '#64748b', font: { size: 12 } },
+                        ticks: { color: '#64748b', font: { size: 12 }, maxRotation: 45, minRotation: 0 },
                         grid: { display: false }
                     }
                 }

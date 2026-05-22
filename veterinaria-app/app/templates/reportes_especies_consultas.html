@@ -1,106 +1,65 @@
-{% extends "appbuilder/base.html" %}
+{% extends "base_moderno.html" %}
+
+{% block title %}Consultas por Especie | VetCare Pro{% endblock %}
+
+{% block page_title %}Consultas por Especie{% endblock %}
 
 {% block content %}
-<style>
-    .dashboard-wrapper {
-        background: transparent;
-        padding: 10px;
-    }
+<div class="max-w-7xl mx-auto space-y-8">
 
-    .title-section {
-        text-align: center;
-        margin-bottom: 30px;
-        padding: 20px 0;
-    }
-
-    .title-section h1 {
-        font-size: 32px;
-        color: #1e3a8a;
-        font-weight: bold;
-    }
-
-    .title-section p {
-        color: #666;
-        font-size: 16px;
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
-        margin-bottom: 30px;
-    }
-
-    .stat-card {
-        background: white;
-        border-radius: 15px;
-        padding: 20px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        border: 1px solid #e5e7eb;
-        text-align: center;
-    }
-
-    .stat-value {
-        font-size: 40px;
-        font-weight: bold;
-        color: #2563eb;
-    }
-
-    .stat-label {
-        color: #64748b;
-        font-size: 14px;
-        font-weight: 500;
-    }
-
-    .chart-container {
-        background: white;
-        border-radius: 15px;
-        padding: 20px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        border: 1px solid #e5e7eb;
-        margin: 0 auto;
-        max-width: 1000px;
-    }
-
-    .chart-title {
-        color: #1e40af;
-        font-size: 20px;
-        margin-bottom: 15px;
-        font-weight: bold;
-        text-align: center;
-    }
-</style>
-
-<div class="dashboard-wrapper">
-    <div class="title-section">
-        <h1>🐾 Consultas por Especie</h1>
-        <p>Análisis de la demanda de servicios según el tipo de mascota</p>
-    </div >
-
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-label">Total de Consultas Analizadas</div>
-            <div class="stat-value">{{ total_consultas }}</div>
+    <!-- Header & Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
+            <div class="p-3 bg-indigo-100 rounded-xl text-indigo-600 text-2xl">🩺</div>
+            <div>
+                <p class="text-sm font-medium text-slate-500">Total de Consultas Analizadas</p>
+                <h3 class="text-2xl font-bold text-slate-800">{{ total_consultas }}</h3>
+            </div>
         </div>
     </div>
 
-    <div class="chart-container">
-        <div class="chart-title">📊 Distribución de Visitas por Especie</div>
-        <div style="height: 450px; position: relative;">
+    <!-- Chart Section -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+                <h3 class="text-lg font-bold text-slate-800">📊 Distribución de Visitas por Especie</h3>
+            </div>
+            <span class="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-semibold rounded-full">Análisis de Demanda</span>
+        </div>
+        <div class="relative h-[450px] w-full">
             <canvas id="graficaEspeciesConsultas"></canvas>
         </div>
     </div>
-</div>
 
+    {% if analisis_ia %}
+    <!-- AI Insights Section -->
+    <div class="bg-gradient-to-br from-indigo-50 to-white p-8 rounded-3xl shadow-sm border border-indigo-100 relative overflow-hidden">
+        <div class="absolute top-0 right-0 p-8 opacity-10 text-8xl">✨</div>
+        <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="text-3xl">🧠</span>
+                <h3 class="text-xl font-bold text-indigo-900">Análisis Inteligente de la IA</h3>
+            </div>
+            <div class="prose prose-slate max-w-none text-slate-600 leading-relaxed">
+                {{ analisis_ia | safe }}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     window.onload = function() {
         const canvas = document.getElementById('graficaEspeciesConsultas');
+        if (!canvas) return;
         const ctx = canvas.getContext('2d');
         const labels = {{ resultados | map(attribute=0) | list | tojson }};
         const data = {{ resultados | map(attribute=1) | list | tojson }};
 
-        const palette = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f9731 la', '#6366f1', '#a855f7'];
+        const palette = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#6366f1', '#a855f7'];
 
         new Chart(ctx, {
             type: 'bar',

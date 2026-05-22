@@ -1,166 +1,69 @@
-{% extends "appbuilder/base.html" %}
+{% extends "base_moderno.html" %}
+
+{% block title %}Reportes de Gestión | VetCare Pro{% endblock %}
+
+{% block page_title %}Reportes de Gestión{% endblock %}
 
 {% block content %}
-<style>
-    /* Mantener el estilo moderno del dashboard pero integrado */
-    .dashboard-wrapper {
-        background: transparent;
-        padding: 10px;
-    }
+<div class="max-w-7xl mx-auto space-y-8">
 
-    .title-section {
-        text-align: center;
-        margin-bottom: 30px;
-        padding: 20px 0;
-    }
-
-    .title-section h1 {
-        font-size: 32px;
-        color: #1e3a8a;
-        font-weight: bold;
-    }
-
-    .title-section p {
-        color: #666;
-        font-size: 16px;
-    }
-
-    .dashboard-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 20px;
-        margin-bottom: 25px;
-    }
-
-    .report-card {
-        background: white;
-        border-radius: 15px;
-        padding: 20px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        border: 1px solid #e5e7eb;
-        transition: 0.3s;
-    }
-
-    .report-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-    }
-
-    .report-card h2 {
-        color: #1e40af;
-        font-size: 20px;
-        margin-bottom: 15px;
-        border-bottom: 2px solid #f3f4f6;
-        padding-bottom: 10px;
-    }
-
-    .total-display {
-        text-align: center;
-        padding: 10px 0;
-    }
-
-    .total-value {
-        font-size: 50px;
-        font-weight: bold;
-        color: #2563eb;
-    }
-
-    .vet-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .vet-item {
-        background: #f9fafb;
-        margin-bottom: 8px;
-        padding: 10px 15px;
-        border-radius: 8px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-left: 4px solid #2563eb;
-    }
-
-    .vet-name {
-        font-weight: 500;
-        color: #374151;
-    }
-
-    .vet-count {
-        background: #2563eb;
-        color: white;
-        padding: 2px 10px;
-        border-radius: 12px;
-        font-size: 12px;
-    }
-
-    .chart-wrapper {
-        background: white;
-        border-radius: 15px;
-        padding: 20px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        border: 1px solid #e5e7eb;
-        height: 450px;
-    }
-
-    .chart-title {
-        color: #1e40af;
-        font-size: 20px;
-        margin-bottom: 15px;
-        font-weight: bold;
-    }
-</style>
-
-<div class="dashboard-wrapper">
-    <!-- Título integrado al estilo de la app -->
-    <div class="title-section">
-        <h1>🐾 Reportes de Gestión</h1>
-        <p>Visualización analítica de consultas y rendimiento veterinario</p>
-    </div>
-
-    <div class="dashboard-grid">
-        <!-- Card Total -->
-        <div class="report-card">
-            <h2 style="color: #1e40af;">Total de Consultas</h2>
-            <div class="total-display">
-                <div class="total-value">{{ total_consultas }}</div>
-                <p class="text-muted">Consultas registradas en el sistema</p>
+    <!-- Header & Summary Cards -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Card Total Consultas -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
+            <div class="p-3 bg-indigo-100 rounded-xl text-indigo-600 text-2xl">🩺</div>
+            <div class="flex-1">
+                <p class="text-sm font-medium text-slate-500">Total de Consultas</p>
+                <h3 class="text-2xl font-bold text-slate-800">{{ total_consultas }}</h3>
             </div>
         </div>
 
-        <!-- Card Listado -->
-        <div class="report-card">
-            <h2 style="color: #1e40af;">👨‍⚕️ Consultas por Veterinario</h2>
-            <ul class="vet-list">
+        <!-- Card Listado Veterinarios (Modernized) -->
+        <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="text-xl">👨‍⚕️</span>
+                <h3 class="text-lg font-bold text-slate-800">Consultas por Veterinario</h3>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                 {% for item in consultas_por_veterinario %}
-                    <li class="vet-item">
-                        <span class="vet-name">{{ item[0] }}</span>
-                        <span class="vet-count">{{ item[1] }} consultas</span>
-                    </li>
+                <div class="flex items-center justify-between p-2 px-3 bg-slate-50 rounded-lg border border-slate-100 hover:bg-indigo-50 transition-colors group">
+                    <span class="text-sm font-medium text-slate-600 group-hover:text-indigo-700">{{ item[0] }}</span>
+                    <span class="px-2 py-0.5 text-xs font-bold bg-indigo-100 text-indigo-700 rounded-full border border-indigo-200">
+                        {{ item[1] }}
+                    </span>
+                </div>
                 {% endfor %}
-            </ul>
+            </div>
         </div>
     </div>
 
-    <!-- Gráfica Principal -->
-    <div class="chart-wrapper">
-        <div class="chart-title">📊 Estadísticas Generales de Actividad</div>
-        <div style="height: 380px;">
+    <!-- Chart Section -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+                <h3 class="text-lg font-bold text-slate-800">📊 Estadísticas Generales de Actividad</h3>
+            </div>
+            <span class="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-semibold rounded-full">Rendimiento</span>
+        </div>
+        <div class="relative h-[400px] w-full">
             <canvas id="grafica"></canvas>
         </div>
     </div>
-</div>
 
+</div>
+{% endblock %}
+
+{% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     window.onload = function() {
         const ctx = document.getElementById('grafica');
+        if (!ctx) return;
+
         const labels = {{ consultas_por_veterinario | map(attribute=0) | list | tojson }};
         const data = {{ consultas_por_veterinario | map(attribute=1) | list | tojson }};
 
-        // Paleta de colores profesionales para las barras
-        const palette = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#6366f1', '#a855f7'];
+        const palette = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#6366f1', '#a855f7'];
         const backgroundColors = data.map((_, i) => palette[i % palette.length]);
 
         new Chart(ctx, {
@@ -172,53 +75,36 @@
                     data: data,
                     backgroundColor: backgroundColors,
                     borderRadius: 8,
-                    borderWidth: 0
+                    borderWidth: 0,
+                    barPercentage: 0.7
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false }
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1e293b',
+                        titleColor: '#f8fafc',
+                        bodyColor: '#f8fafc',
+                        cornerRadius: 10,
+                        callbacks: {
+                            label: function(context) {
+                                return ' 🩺 ' + context.parsed.y + ' consultas';
+                            }
+                        }
+                    }
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        grid: { color: '#f3f4f6' }
+                        ticks: { stepSize: 1, color: '#64748b', font: { size: 12 } },
+                        grid: { color: '#f1f5f9', drawBorder: false }
                     },
                     x: {
+                        ticks: { color: '#64748b', font: { size: 12 } },
                         grid: { display: false }
-                    }
-                }
-            }
-        });
-
-        // Gráfica de Distribución de Especies
-        const ctxEspecies = document.getElementById('graficaEspecies');
-        const labelsEspecies = {{ distribucion_especies | map(attribute=0) | list | tojson }};
-        const dataEspecies = {{ distribucion_especies | map(attribute=1) | list | tojson }};
-
-        new Chart(ctxEspecies, {
-            type: 'pie',
-            data: {
-                labels: labelsEspecies,
-                datasets: [{
-                    data: dataEspecies,
-                    backgroundColor: palette,
-                    borderWidth: 2,
-                    borderColor: '#ffffff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            color: '#374151',
-                            font: { size: 12 }
-                        }
                     }
                 }
             }
