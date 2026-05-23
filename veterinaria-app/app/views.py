@@ -16,6 +16,7 @@ from .models import (
     Consulta,
     Tratamiento
 )
+from .ia_servicio import analizar_recurrencia, consultas_por_veterinario
 from .ia_servicio import analizar_recurrencia
 
 from .models import (
@@ -133,11 +134,21 @@ class ReporteView(BaseView):
 
         total_consultas = db.session.query(Consulta).count()
 
+        consultas_por_veterinario_data = db.session.query(
         consultas_por_veterinario = db.session.query(
             Veterinario.nombre,
             db.func.count(Consulta.id)
         ).join(Consulta).group_by(Veterinario.nombre).all()
 
+        analisis_ia = consultas_por_veterinario(
+            consultas_por_veterinario_data
+        )
+
+        return self.render_template(
+            'reportes.html',
+            total_consultas=total_consultas,
+            consultas_por_veterinario=consultas_por_veterinario_data,
+            analisis_ia=analisis_ia
         return self.render_template(
             'reportes.html',
             total_consultas=total_consultas,
