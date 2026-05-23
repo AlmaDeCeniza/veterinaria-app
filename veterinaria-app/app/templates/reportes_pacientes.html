@@ -1,0 +1,113 @@
+{% extends "base_moderno.html" %}
+
+{% block title %}Análisis de Pacientes | VetCare Pro{% endblock %}
+
+{% block page_title %}Análisis de Pacientes{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-8">
+
+    <!-- Header & Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
+            <div class="p-3 bg-indigo-100 rounded-xl text-indigo-600 text-2xl">🐾</div>
+            <div>
+                <p class="text-sm font-medium text-slate-500">Total de Pacientes</p>
+                <h3 class="text-2xl font-bold text-slate-800">{{ total_pacientes }}</h3>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
+            <div class="p-3 bg-emerald-100 rounded-xl text-emerald-600 text-2xl">🎂</div>
+            <div>
+                <p class="text-sm font-medium text-slate-500">Edad Promedio</p>
+                <h3 class="text-2xl font-bold text-slate-800">{{ edad_promedio }} años</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Section -->
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-bold text-slate-800">📊 Distribución por Especie</h3>
+            <span class="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-semibold rounded-full">Demografía</span>
+        </div>
+        <div class="relative h-[400px] w-full">
+            <canvas id="graficaEspecies"></canvas>
+        </div>
+    </div>
+
+    {% if analisis_ia %}
+    <!-- AI Insights Section -->
+    <div class="bg-gradient-to-br from-indigo-50 to-white p-8 rounded-3xl shadow-sm border border-indigo-100 relative overflow-hidden">
+        <div class="absolute top-0 right-0 p-8 opacity-10 text-8xl">✨</div>
+        <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="text-3xl">🧠</span>
+                <h3 class="text-xl font-bold text-indigo-900">Análisis Inteligente de la IA</h3>
+            </div>
+            <div class="prose prose-slate max-w-none text-slate-600 leading-relaxed">
+                {{ analisis_ia | safe }}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    window.onload = function() {
+        const ctxEspecies = document.getElementById('graficaEspecies');
+        if (!ctxEspecies) return;
+
+        const labelsEspecies = {{ distribucion_especies | map(attribute=0) | list | tojson }};
+        const dataEspecies = {{ distribucion_especies | map(attribute=1) | list | tojson }};
+
+        const palette = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#6366f1', '#a855f7'];
+
+        new Chart(ctxEspecies, {
+            type: 'pie',
+            data: {
+                labels: labelsEspecies,
+                datasets: [{
+                    data: dataEspecies,
+                    backgroundColor: palette,
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            color: '#64748b',
+                            font: { size: 12 },
+                            padding: 20
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#1e293b',
+                        titleColor: '#f8fafc',
+                        bodyColor: '#f8fafc',
+                        cornerRadius: 10,
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                let value = context.raw || 0;
+                                let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                let percentage = Math.round((value / total) * 100);
+                                return label + ': ' + value + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,179 @@
+{% extends "base_moderno.html" %}
+
+{% block title %}Recurrencia de Pacientes | VetCare Pro{% endblock %}
+
+{% block page_title %}Recurrencia de Pacientes{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chart-container {
+        position: relative;
+        height: 400px;
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-8">
+
+    <!-- Header & Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
+            <div class="p-3 bg-indigo-100 rounded-xl text-indigo-600 text-2xl">🔄</div>
+            <div>
+                <p class="text-sm font-medium text-slate-500">Pacientes Recurrentes</p>
+                <h3 class="text-2xl font-bold text-slate-800">{{ total_pacientes }}</h3>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
+            <div class="p-3 bg-emerald-100 rounded-xl text-emerald-600 text-2xl">🐾</div>
+            <div>
+                <p class="text-sm font-medium text-slate-500">Promedio Visitas</p>
+                <h3 class="text-2xl font-bold text-slate-800">{{ promedio_visitas }}</h3>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center gap-4">
+            <div class="p-3 bg-amber-100 rounded-xl text-amber-600 text-2xl">⭐</div>
+            <div>
+                <p class="text-sm font-medium text-slate-500">Máxima Recurrencia</p>
+                <h3 class="text-2xl font-bold text-slate-800">{{ max_recurrencia }} visitas</h3>
+            </div>
+        </div>
+    </div>
+
+    {% if resultados %}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Chart Section -->
+        <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-bold text-slate-800">📊 Análisis de Frecuencia</h3>
+                <span class="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-semibold rounded-full">Visualización de Datos</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="graficaRecurrencia"></canvas>
+            </div>
+        </div>
+
+        <!-- Table Section -->
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <h3 class="text-lg font-bold text-slate-800 mb-6">📋 Detalle de Pacientes</h3>
+            <div class="overflow-y-auto max-h-[400px] pr-2">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="text-slate-400 text-xs uppercase tracking-wider border-b border-slate-100">
+                            <th class="pb-3 font-semibold">Mascota</th>
+                            <th class="pb-3 font-semibold text-right">Visitas</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for item in resultados %}
+                        <tr class="hover:bg-slate-50 transition-colors group cursor-default">
+                            <td class="py-3">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-lg">🐾</span>
+                                    <div>
+                                        <p class="font-medium text-slate-700 group-hover:text-indigo-600 transition-colors">{{ item[0] }}</p>
+                                        <p class="text-xs text-slate-400">{{ item[1] }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-3 text-right">
+                                <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700 border border-indigo-200">
+                                    {{ item[2] }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Insights Section -->
+    <div class="bg-gradient-to-br from-indigo-50 to-white p-8 rounded-3xl shadow-sm border border-indigo-100 relative overflow-hidden">
+        <div class="absolute top-0 right-0 p-8 opacity-10 text-8xl">✨</div>
+        <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="text-3xl">🧠</span>
+                <h3 class="text-xl font-bold text-indigo-900">Análisis Inteligente de la IA</h3>
+            </div>
+            <div class="prose prose-slate max-w-none text-slate-600 leading-relaxed">
+                {{ analisis_ia | safe }}
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="flex flex-col items-center justify-center py-20 text-center">
+        <div class="text-6xl mb-4">📭</div>
+        <h3 class="text-xl font-bold text-slate-800">Sin datos disponibles</h3>
+        <p class="text-slate-500">No se encontraron registros de recurrencia en este momento.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    window.onload = function() {
+        const canvas = document.getElementById('graficaRecurrencia');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        const labels = {{ resultados | map(attribute=0) | list | tojson if resultados else '[]' }};
+        const realData = {{ resultados | map(attribute=2) | list | tojson if resultados else '[]' }};
+
+        const palette = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#f97316', '#6366f1', '#a855f7'];
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Visitas',
+                    data: realData,
+                    backgroundColor: realData.map((_, i) => palette[i % palette.length]),
+                    borderRadius: 8,
+                    borderWidth: 0,
+                    barPercentage: 0.7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1e293b',
+                        titleColor: '#f8fafc',
+                        bodyColor: '#f8fafc',
+                        cornerRadius: 10,
+                        callbacks: {
+                            label: function(context) {
+                                return ' 🐾 ' + context.parsed.y + ' visitas';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1, color: '#64748b', font: { size: 12 } },
+                        grid: { color: '#f1f5f9', drawBorder: false }
+                    },
+                    x: {
+                        ticks: { color: '#64748b', font: { size: 12 }, maxRotation: 45, minRotation: 0 },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
+</script>
+{% endblock %}
