@@ -1,0 +1,54 @@
+{% extends "base_moderno.html" %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-8">
+    <!-- Header Section -->
+    <div class="flex items-center gap-3 mb-6">
+        <div class="p-3 bg-indigo-100 rounded-xl text-indigo-600 text-xl">📝</div>
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">{{ page_title if page_title else "Formulario" }}</h1>
+            <p class="text-slate-500 text-sm">Complete la información solicitada para continuar.</p>
+        </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+        <form method="POST" class="space-y-6">
+            {% if form.csrf_token %}
+                {{ form.csrf_token }}
+            {% endif %}
+
+            <div class="grid grid-cols-1 gap-6">
+                {% for field in form %}
+                    {% if field.type != 'CSRFToken' %}
+                    <div class="space-y-2">
+                        <label class="text-sm font-semibold text-slate-700 block" for="{{ field.id }}">
+                            {{ field.label.text }}
+                        </label>
+                        <div class="relative">
+                            {{ field(class="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all text-sm text-slate-600") }}
+                        </div>
+                        {% if field.errors %}
+                            {% for error in field.errors %}
+                            <p class="text-xs text-red-500 mt-1">{{ error }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center justify-end gap-3 pt-6 border-t border-slate-100">
+                {% set endpoint = request.endpoint.rsplit('.', 1)[0] if request.endpoint else '' %}
+                <a href="{{ url_for(endpoint + '.list') if endpoint else '#' }}" class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-all">
+                    Cancelar
+                </a>
+                <button type="submit" class="px-6 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-all shadow-sm hover:shadow-md">
+                    Guardar Cambios
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

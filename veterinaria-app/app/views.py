@@ -2,7 +2,7 @@ import os
 
 from werkzeug.utils import secure_filename
 from wtforms import FileField
-from flask import current_app, request
+from flask import current_app, request, render_template
 from .extensions import appbuilder, db
 from flask_appbuilder import BaseView, ModelView, expose
 from flask_appbuilder.models.sqla.interface import SQLAInterface
@@ -117,6 +117,19 @@ class ConsultaModelView(ModelView):
     edit_columns = ["mascota", "veterinario", "motivo"]
     show_columns = ["mascota", "veterinario", "motivo", "fecha"]
 
+    @expose('/debug-consultas')
+    def debug_consultas(self):
+        items = db.session.query(Consulta).all()
+        return f"Direct DB query found {len(items)} consultas. First one: {items[0] if items else 'None'}"
+
+    @expose('/debug-query-consultas')
+    def debug_query_consultas(self):
+        query = self.get_query()
+        count = query.count()
+        return f"FAB get_query found {count} consultas."
+
+    # End of ConsultaModelView
+
 
 class TratamientoModelView(ModelView):
     datamodel = SQLAInterface(Tratamiento)
@@ -125,6 +138,12 @@ class TratamientoModelView(ModelView):
     add_columns = ["descripcion", "consulta"]
     edit_columns = ["descripcion", "consulta"]
     show_columns = ["descripcion", "consulta"]
+
+    @expose('/debug-query-tratamientos')
+    def debug_query_tratamientos(self):
+        query = self.get_query()
+        count = query.count()
+        return f"FAB get_query found {count} tratamientos."
 
 class ReporteView(BaseView):
     route_base = '/reportes'

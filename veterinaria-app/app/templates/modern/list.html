@@ -1,0 +1,103 @@
+{% extends "base_moderno.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto space-y-6">
+    <!-- DEBUG BANNER -->
+    <div class="bg-amber-50 border-l-4 border-amber-400 p-4 mb-4 text-amber-700 text-xs font-mono rounded shadow-sm">
+        <strong class="block mb-1">Debug Context:</strong>
+        items_val: {{ items }} |
+        items_type: {{ items.__class__.__name__ if items is not none else 'None' }} |
+        view_class: {{ view.__class__.__name__ if view else 'None' }} |
+        query_count: {{ view.get_query().count() if view else 'N/A' }} |
+        cols_len: {{ list_columns|length if list_columns else 'N/A' }}
+    </div>
+    <!-- Header Section -->
+    <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-indigo-100 rounded-lg text-indigo-600">
+                <span class="text-xl">📋</span>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800">{{ view.label if view else "Listado" }}</h1>
+                <p class="text-slate-500 text-sm">Gestión de registros del sistema</p>
+            </div>
+        </div>
+        {% set endpoint = request.endpoint.rsplit('.', 1)[0] if request.endpoint else '' %}
+        {% if endpoint %}
+        <a href="{{ url_for(endpoint + '.add') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-all shadow-sm">
+            <span>+</span> Añadir Nuevo
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Main Table Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                        {% set cols = list_columns if list_columns else (view.list_columns if view else []) %}
+                        {% for col in cols %}
+                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                            {{ col }}
+                        </th>
+                        {% endfor %}
+                        <th class="px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">
+                            Acciones
+                        </th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% set data_items = items if (items is iterable and items is not string) else (view.get_query().all() if view else []) %}
+                    {% for item in data_items %}
+                    <tr class="hover:bg-indigo-50/50 transition-colors group">
+                        {% set cols = list_columns if list_columns else (view.list_columns if view else []) %}
+                        {% for col in cols %}
+                        <td class="px-6 py-4 text-sm text-slate-600">
+                            {% set val = getattr(item, col, '') %}
+                            {{ val if val else '—' }}
+                        </td>
+                        {% endfor %}
+                        <td class="px-6 py-4 text-right space-x-2">
+                            {% if endpoint %}
+                            <a href="{{ url_for(endpoint + '.edit', id=item.id) }}" class="inline-flex p-2 text-indigo-600 hover:bg-indigo-100 rounded-lg transition-all" title="Editar">
+                                ✏️
+                            </a>
+                            <a href="{{ url_for(endpoint + '.show', id=item.id) }}" class="inline-flex p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-all" title="Ver">
+                                👁️
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="100%" class="px-6 py-12 text-center text-slate-400">
+                            <div class="flex flex-col items-center justify-center">
+                                <span class="text-4xl mb-2">📂</span>
+                                <p>No se encontraron registros</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if paginate %}
+    <div class="flex items-center justify-between px-4 py-3 bg-white rounded-xl border border-slate-200 shadow-sm">
+        <div class="text-sm text-slate-500">
+            Mostrando <span class="font-medium text-slate-800">{{ items|length }}</span> resultados
+        </div>
+        <div class="flex gap-2">
+            {% if paginate.has_prev %}
+            <a href="{{ url_for(endpoint + '.list', page=paginate.prev_num) }}" class="px-3 py-1 text-sm font-medium text-slate-600 bg-slate-100 rounded-md hover:bg-indigo-100 hover:text-indigo-600 transition-all">Anterior</a>
+            {% endif %}
+            {% if paginate.has_next %}
+            <a href="{{ url_for(endpoint + '.list', page=paginate.next_num) }}" class="px-3 py-1 text-sm font-medium text-slate-600 bg-slate-100 rounded-md hover:bg-indigo-100 hover:text-indigo-600 transition-all">Siguiente</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
