@@ -16,7 +16,13 @@ from .models import (
     Consulta,
     Tratamiento
 )
-from .ia_servicio import analizar_recurrencia, consultas_por_veterinario
+from .ia_servicio import (
+    analizar_recurrencia,
+    consultas_por_veterinario,
+    analizar_tendencias,
+    consultas_por_especie,
+    analizar_pacientes
+)
 
 
 from .models import (
@@ -154,6 +160,7 @@ class PacientesReporteView(BaseView):
 
     @expose('/')
     def index(self):
+
         total_pacientes = db.session.query(Mascota).count()
 
         distribucion_especies = db.session.query(
@@ -161,14 +168,29 @@ class PacientesReporteView(BaseView):
             db.func.count(Mascota.id)
         ).join(Mascota).group_by(TipoMascota.nombre).all()
 
-        edad_promedio = db.session.query(db.func.avg(Mascota.edad)).scalar()
+        edad_promedio = db.session.query(
+            db.func.avg(Mascota.edad)
+        ).scalar()
+
         edad_promedio = round(edad_promedio, 1) if edad_promedio else 0
+
+        mascotas_data = [
+            (
+                mascota.nombre,
+                mascota.tipo.nombre if mascota.tipo else "Sin especie",
+                mascota.edad
+            )
+            for mascota in db.session.query(Mascota).all()
+        ]
+
+        analisis_ia = analizar_pacientes(mascotas_data)
 
         return self.render_template(
             'reportes_pacientes.html',
             total_pacientes=total_pacientes,
             distribucion_especies=distribucion_especies,
-            edad_promedio=edad_promedio
+            edad_promedio=edad_promedio,
+            analisis_ia=analisis_ia
         )
 
 class TemporalReporteView(BaseView):
@@ -176,48 +198,70 @@ class TemporalReporteView(BaseView):
 
     @expose('/')
     def index(self):
-        # Obtener fechas del filtro desde la request
+
         start_date_str = request.args.get('start_date')
         end_date_str = request.args.get('end_date')
 
         query = db.session.query(Consulta.fecha)
 
-        # Aplicar filtros si existen
         if start_date_str:
             try:
                 from datetime import datetime
-                start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
-                query = query.filter(Consulta.fecha >= start_date)
+                start_date = datetime.strptime(
+                    start_date_str,
+                    '%Y-%m-%d'
+                )
+                query = query.filter(
+                    Consulta.fecha >= start_date
+                )
             except ValueError:
                 pass
 
         if end_date_str:
             try:
                 from datetime import datetime
-                end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
-                query = query.filter(Consulta.fecha <= end_date)
+                end_date = datetime.strptime(
+                    end_date_str,
+                    '%Y-%m-%d'
+                )
+                query = query.filter(
+                    Consulta.fecha <= end_date
+                )
             except ValueError:
                 pass
 
         consultas = query.all()
 
-        # Diccionario para contar consultas por mes (formato 'YYYY-MM')
         conteo_mensual = {}
 
         for c in consultas:
-            fecha = c.fecha
-            if fecha:
-                mes_clave = fecha.strftime('%Y-%m')
-                conteo_mensual[mes_clave] = conteo_mensual.get(mes_clave, 0) + 1
 
-        # Ordenar los meses cronológicamente
+            fecha = c.fecha
+
+            if fecha:
+
+                mes_clave = fecha.strftime('%Y-%m')
+
+                conteo_mensual[mes_clave] = (
+                    conteo_mensual.get(mes_clave, 0) + 1
+                )
+
         labels = sorted(conteo_mensual.keys())
-        data = [conteo_mensual[mes] for mes in labels]
+
+        data = [
+            conteo_mensual[mes]
+            for mes in labels
+        ]
+
+        analisis_ia = analizar_tendencias(
+            list(zip(labels, data))
+        )
 
         return self.render_template(
             'reportes_temporal.html',
             labels=labels,
             data=data,
+            analisis_ia=analisis_ia,
             start_date=start_date_str,
             end_date=end_date_str
         )
@@ -261,19 +305,27 @@ class EspeciesConsultasReporteView(BaseView):
 
     @expose('/')
     def index(self):
-        # Contar consultas agrupadas por el nombre del tipo de mascota
-        # Empezamos la consulta desde Consulta para evitar errores de join
+
         resultados = db.session.query(
             TipoMascota.nombre,
             db.func.count(Consulta.id)
-        ).select_from(Consulta).join(Mascota).join(TipoMascota).group_by(TipoMascota.nombre).all()
+        ).select_from(Consulta)\
+         .join(Mascota)\
+         .join(TipoMascota)\
+         .group_by(TipoMascota.nombre)\
+         .all()
 
-        total_consultas = sum(item[1] for item in resultados)
+        total_consultas = sum(
+            item[1] for item in resultados
+        )
+
+        analisis_ia = consultas_por_especie(resultados)
 
         return self.render_template(
             'reportes_especies_consultas.html',
             resultados=resultados,
-            total_consultas=total_consultas
+            total_consultas=total_consultas,
+            analisis_ia=analisis_ia
         )
 
 
