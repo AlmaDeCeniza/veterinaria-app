@@ -7,9 +7,8 @@ from dotenv import load_dotenv
 # ===================================================
 
 load_dotenv()
-
-API_KEY = os.getenv("OPENROUTER_API_KEY")
-
+API_KEY = ''
+#API_KEY = os.getenv("OPENROUTER_API_KEY")
 BASE_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 MODEL = "deepseek/deepseek-chat"
@@ -46,12 +45,15 @@ def generar_respuesta_ia(prompt):
                     {
                         "role": "system",
                         "content": """
-                        Eres un experto en veterinaria,
-                        análisis de datos,
-                        inteligencia empresarial
-                        y gestión clínica.
+                        Eres un experto en veterinaria, análisis de datos, inteligencia empresarial y gestión clínica.
 
-                        Responde solamente en HTML moderno.
+                        REGLAS CRÍTICAS DE RESPUESTA:
+                        1. Responde ÚNICAMENTE con fragmentos de HTML (div, h2, p, ul, li, span).
+                        2. NUNCA incluyas etiquetas <html>, <head>, <body> o <!DOCTYPE>.
+                        3. NO uses bloques de código markdown (no uses ```html).
+                        4. NO escribas introducciones como "Aquí tienes el análisis" o "Claro, aquí está".
+                        5. Asegúrate de que todas las etiquetas <div> estén correctamente cerradas.
+                        6. Usa clases de Tailwind CSS si es necesario para mejorar la estética, pero mantente dentro de la estructura de fragmentos.
                         """
                     },
                     {
@@ -68,8 +70,21 @@ def generar_respuesta_ia(prompt):
         response.raise_for_status()
 
         result = response.json()
+        content = result["choices"][0]["message"]["content"]
 
-        return result["choices"][0]["message"]["content"]
+        # 1. Limpiar bloques de código Markdown (ej: ```html ... ```)
+        if "```" in content:
+            import re
+            match = re.search(r"```(?:html)?\s*(.*?)\s*```", content, re.DOTALL | re.IGNORECASE)
+            if match:
+                content = match.group(1)
+
+        # 2. Sanitización de etiquetas raíz (Evitar que la IA envíe <html> o <body>)
+        import re
+        content = re.sub(r'<(html|body|head|meta)[^>]*>', '', content, flags=re.IGNORECASE)
+        content = re.sub(r'</(html|body|head|meta)>', '', content, flags=re.IGNORECASE)
+
+        return content
 
     except Exception as e:
 
